@@ -1,0 +1,27 @@
+name: Publish docker image
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Building Client
+        run: | 
+          docker build -t ghcr.io/cv65kr/temporal-test-server:latest .
+          docker build --cache-from ghcr.io/cv65kr/temporal-test-server:latest -t ghcr.io/cv65kr/temporal-test-server:$GITHUB_SHA .
+      
+      - name: Deploying to Docker Registry
+        run: |
+          docker push ghcr.io/cv65kr/temporal-test-server:$GITHUB_SHA
+          docker push ghcr.io/cv65kr/temporal-test-server:latest
