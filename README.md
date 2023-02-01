@@ -1,8 +1,8 @@
-# Dockerized version of Temporal
+# Dockerized version of Temporal test server
 
 Benefits:
 - Support for ARM processors
-- It contains `reset` endpoint - `POST http://127.0.0.1:1323/reset`.
+- Contains `reset` endpoint - `POST http://127.0.0.1:1323/reset`
 
 ## How use it
 
