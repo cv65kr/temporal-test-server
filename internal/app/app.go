@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os/exec"
+	"syscall"
 
 	"github.com/labstack/echo/v4"
 )
@@ -58,14 +59,14 @@ func (a *App) RunTestServer(path *string) {
 
 		<-a.resetSignal
 
-		if err := a.cmd.Process.Kill(); err != nil {
+		if err := a.cmd.Process.Signal(syscall.SIGKILL); err != nil {
 			log.Fatal("failed to kill process")
 		}
 	}
 }
 
 func (a *App) Stop() {
-	if err := a.cmd.Process.Kill(); err != nil {
+	if err := a.cmd.Process.Signal(syscall.SIGKILL); err != nil {
 		log.Fatal("failed to kill process")
 	}
 }
