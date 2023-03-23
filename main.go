@@ -4,6 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"github/cv65kr/temporal-test-server/internal/app"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/labstack/echo/v4"
 )
@@ -12,11 +15,15 @@ func main() {
 	path := flag.String("path", "/app/temporal-test-server", "Path to temporal test server")
 	flag.Parse()
 
-	done := make(chan struct{})
+	stopCh := make(chan os.Signal, 1)
+	signal.Notify(stopCh, syscall.SIGINT, syscall.SIGTERM)
+
 	app := app.NewApp()
 
 	// Run Temporal test server as a child process
-	go app.RunTestServer(*path)
+	go func() {
+		app.RunTestServer(path)
+	}()
 
 	// Run HTTP server it will be responsible for handling reset signal
 	go func() {
@@ -26,5 +33,6 @@ func main() {
 		e.Logger.Fatal(e.Start(":1323"))
 	}()
 
-	<-done
+	<-stopCh
+	app.Stop()
 }
