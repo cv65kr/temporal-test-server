@@ -13,18 +13,21 @@ import (
 )
 
 type App struct {
-	resetSignal chan struct{}
-	cmd         *exec.Cmd
+	resetSignal        chan struct{}
+	confirmationSignal chan struct{}
+	cmd                *exec.Cmd
 }
 
 func NewApp() *App {
 	return &App{
-		resetSignal: make(chan struct{}),
+		resetSignal:        make(chan struct{}),
+		confirmationSignal: make(chan struct{}),
 	}
 }
 
 func (a *App) ResetControllerHandler(c echo.Context) error {
 	a.resetSignal <- struct{}{}
+	<-a.confirmationSignal
 	return c.String(http.StatusOK, "OK")
 }
 
@@ -62,6 +65,8 @@ func (a *App) RunTestServer(path *string) {
 		if err := a.cmd.Process.Signal(syscall.SIGKILL); err != nil {
 			log.Fatal("failed to kill process")
 		}
+
+		a.confirmationSignal <- struct{}{}
 	}
 }
 
