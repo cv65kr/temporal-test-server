@@ -7,6 +7,9 @@
 			"request": "launch",
 			"mode": "debug",
             "program": "${workspaceFolder}/main.go",
+            "args": [
+                "-path=./temporal-test-server"
+            ]
         }
     ]
 }
