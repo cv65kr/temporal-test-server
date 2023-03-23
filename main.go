@@ -1,55 +1,28 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"net/http"
-	"os/exec"
+	"github/cv65kr/temporal-test-server/internal/app"
 
 	"github.com/labstack/echo/v4"
 )
 
-type App struct {
-	resetSignal chan struct{}
-}
-
-func NewApp() *App {
-	return &App{
-		resetSignal: make(chan struct{}),
-	}
-}
-
-func (a *App) resetControllerHandler(c echo.Context) error {
-	a.resetSignal <- struct{}{}
-	return c.String(http.StatusOK, "OK")
-}
-
-func (a *App) runTestServer() {
-	for {
-		fmt.Println("[START] Temporal test server")
-		cmd := exec.Command("/app/temporal-test-server", "7233", "--enable-time-skipping")
-		if err := cmd.Start(); err != nil {
-			panic(err)
-		}
-
-		<-a.resetSignal
-		if err := cmd.Process.Kill(); err != nil {
-			fmt.Println("failed to kill process")
-		}
-	}
-}
-
 func main() {
+	path := flag.String("path", "/app/temporal-test-server", "Path to temporal test server")
+	flag.Parse()
+
 	done := make(chan struct{})
-	app := NewApp()
+	app := app.NewApp()
 
 	// Run Temporal test server as a child process
-	go app.runTestServer()
+	go app.RunTestServer(*path)
 
 	// Run HTTP server it will be responsible for handling reset signal
 	go func() {
 		fmt.Println("[START] HTTP server")
 		e := echo.New()
-		e.POST("/reset", app.resetControllerHandler)
+		e.POST("/reset", app.ResetControllerHandler)
 		e.Logger.Fatal(e.Start(":1323"))
 	}()
 
