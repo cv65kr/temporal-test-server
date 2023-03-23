@@ -32,7 +32,6 @@ func (a *App) ResetControllerHandler(c echo.Context) error {
 }
 
 func (a *App) RunTestServer(path *string) {
-
 	for {
 		fmt.Println("[START] Temporal test server from " + *path)
 		a.cmd = exec.Command(*path, "7233", "--enable-time-skipping")
@@ -66,12 +65,17 @@ func (a *App) RunTestServer(path *string) {
 			log.Fatal("failed to kill process")
 		}
 
+		a.cmd.Process.Wait()
+
 		a.confirmationSignal <- struct{}{}
 	}
 }
 
 func (a *App) Stop() {
+	fmt.Println("[STOPPING] Temporal test server")
 	if err := a.cmd.Process.Signal(syscall.SIGKILL); err != nil {
 		log.Fatal("failed to kill process")
 	}
+
+	a.cmd.Process.Wait()
 }
