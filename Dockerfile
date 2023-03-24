@@ -15,7 +15,7 @@ RUN adduser --system --group app \
 
 WORKDIR /app
 
-ARG TEMPORAL_TEST_SERVER_VERSION=1.18.2
+ARG TEMPORAL_TEST_SERVER_VERSION=1.19.1
 
 RUN curl -LO https://github.com/temporalio/sdk-java/releases/download/v${TEMPORAL_TEST_SERVER_VERSION}/temporal-test-server_${TEMPORAL_TEST_SERVER_VERSION}_linux_amd64.tar.gz \
     && tar -xzf temporal-test-server_${TEMPORAL_TEST_SERVER_VERSION}_linux_amd64.tar.gz \
